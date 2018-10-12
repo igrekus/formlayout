@@ -46,16 +46,17 @@ import datetime
 
 STDERR = sys.stderr
 
-
 # ---+- PyQt-PySide compatibility -+----
 try:
     import PyQt4
+
     raise ImportError('Qt4 is not supported')
 except ImportError:
     pass
 
 try:
     import PySide
+
     raise ImportError('PySide is deprecated, use PySide2')
 except ImportError:
     pass
@@ -67,16 +68,17 @@ try:
     from PyQt5.QtCore import pyqtSignal as Signal
     from PyQt5.QtCore import pyqtSlot as Slot
     from PyQt5.QtCore import pyqtProperty as Property
+
     SIGNAL = None
     QT_LIB = 'PyQt5'
 except ImportError:
     try:
         from PySide2.QtGui import *
         from PySide2.QtCore import *
+
         QT_LIB = 'PySide2'
     except ImportError:
         raise ImportError('formlayout requires PyQt4, PyQt5 or PySide')
-
 
 # ---+- Python 2-3 compatibility -+----
 PY2 = sys.version[0] == '2'
@@ -84,6 +86,8 @@ PY2 = sys.version[0] == '2'
 if PY2:
     # Python 2
     import codecs
+
+
     def u(obj):
         """Make unicode object"""
         return codecs.unicode_escape_decode(obj)[0]
@@ -92,6 +96,7 @@ else:
     def u(obj):
         """Return string as it is"""
         return obj
+
 
 def is_text_string(obj):
     """Return True if `obj` is a text string, False if it is anything else,
@@ -103,6 +108,7 @@ def is_text_string(obj):
         # Python 3
         return isinstance(obj, str)
 
+
 def is_binary_string(obj):
     """Return True if `obj` is a binary string, False if it is anything else"""
     if PY2:
@@ -112,10 +118,12 @@ def is_binary_string(obj):
         # Python 3
         return isinstance(obj, bytes)
 
+
 def is_string(obj):
     """Return True if `obj` is a text or binary Python string object,
     False if it is anything else, like a QString (Python 2, PyQt API #1)"""
     return is_text_string(obj) or is_binary_string(obj)
+
 
 def to_text_string(obj, encoding=None):
     """Convert `obj` to (unicode) text string"""
@@ -143,7 +151,7 @@ class ColorButton(QPushButton):
     __pyqtSignals__ = ("colorChanged(QColor)",)
     if SIGNAL is None:
         colorChanged = Signal("QColor")
-    
+
     def __init__(self, parent=None):
         QPushButton.__init__(self, parent)
         self.setFixedSize(20, 20)
@@ -153,15 +161,15 @@ class ColorButton(QPushButton):
         else:
             self.connect(self, SIGNAL("clicked()"), self.choose_color)
         self._color = QColor()
-    
+
     def choose_color(self):
         color = QColorDialog.getColor(self._color, self.parentWidget())
         if color.isValid():
             self.set_color(color)
-    
+
     def get_color(self):
         return self._color
-    
+
     @Slot(QColor)
     def set_color(self, color):
         if color != self._color:
@@ -173,7 +181,7 @@ class ColorButton(QPushButton):
             pixmap = QPixmap(self.iconSize())
             pixmap.fill(color)
             self.setIcon(QIcon(pixmap))
-    
+
     color = Property("QColor", get_color, set_color)
 
 
@@ -183,11 +191,11 @@ def text_to_qcolor(text):
     Avoid warning from Qt when an invalid QColor is instantiated
     """
     color = QColor()
-    if not is_string(text): # testing for QString (PyQt API#1)
+    if not is_string(text):  # testing for QString (PyQt API#1)
         text = str(text)
     if not is_text_string(text):
         return color
-    if text.startswith('#') and len(text)==7:
+    if text.startswith('#') and len(text) == 7:
         correct = '#0123456789abcdef'
         for char in text:
             if char.lower() not in correct:
@@ -200,6 +208,7 @@ def text_to_qcolor(text):
 
 class ColorLayout(QHBoxLayout):
     """Color-specialized QLineEdit layout"""
+
     def __init__(self, color, parent=None):
         QHBoxLayout.__init__(self)
         assert isinstance(color, QColor)
@@ -226,7 +235,7 @@ class ColorLayout(QHBoxLayout):
 
     def update_text(self, color):
         self.lineedit.setText(color.name())
-        
+
     def text(self):
         return self.lineedit.text()
 
@@ -237,6 +246,7 @@ class ColorLayout(QHBoxLayout):
 
 class FileLayout(QHBoxLayout):
     """File-specialized QLineEdit layout"""
+
     def __init__(self, value, parent=None):
         QHBoxLayout.__init__(self)
         self.value = value
@@ -266,11 +276,12 @@ class FileLayout(QHBoxLayout):
 
 class SliderLayout(QHBoxLayout):
     """QSlider with QLabel"""
+
     def __init__(self, value, parent=None):
         QHBoxLayout.__init__(self)
         index = value.find('@')
         if index != -1:
-            value, default = value[:index], int(value[index+1:])
+            value, default = value[:index], int(value[index + 1:])
         else:
             default = False
         parsed = value.split(':')
@@ -306,6 +317,7 @@ class SliderLayout(QHBoxLayout):
 
 class RadioLayout(QVBoxLayout):
     """Radio buttons layout with QButtonGroup"""
+
     def __init__(self, buttons, index, parent=None):
         QVBoxLayout.__init__(self)
         self.setSpacing(0)
@@ -327,6 +339,7 @@ class RadioLayout(QVBoxLayout):
 
 class CheckLayout(QVBoxLayout):
     """Check boxes layout with QButtonGroup"""
+
     def __init__(self, boxes, checks, parent=None):
         QVBoxLayout.__init__(self)
         self.setSpacing(0)
@@ -348,6 +361,7 @@ class CheckLayout(QVBoxLayout):
 
 class PushLayout(QHBoxLayout):
     """Push buttons horizontal layout"""
+
     def __init__(self, buttons, parent=None):
         QHBoxLayout.__init__(self)
         self.result = parent.result
@@ -379,6 +393,7 @@ class PushLayout(QHBoxLayout):
 
 class CountLayout(QHBoxLayout):
     """Field with a QSpinBox"""
+
     def __init__(self, field, parent=None):
         QHBoxLayout.__init__(self)
         self.field = field
@@ -406,16 +421,17 @@ def font_is_installed(font):
     return [fam for fam in QFontDatabase().families()
             if to_text_string(fam) == font]
 
+
 def tuple_to_qfont(tup):
     """
     Create a QFont from tuple:
         (family [string], size [int], italic [bool], bold [bool])
     """
     if not isinstance(tup, tuple) or len(tup) != 4 \
-       or not is_text_string(tup[0]) \
-       or not isinstance(tup[1], int) \
-       or not isinstance(tup[2], bool) \
-       or not isinstance(tup[3], bool):
+            or not is_text_string(tup[0]) \
+            or not isinstance(tup[1], int) \
+            or not isinstance(tup[2], bool) \
+            or not isinstance(tup[3], bool):
         return None
     font = QFont()
     family, size, italic, bold = tup
@@ -425,12 +441,15 @@ def tuple_to_qfont(tup):
     font.setBold(bold)
     return font
 
+
 def qfont_to_tuple(font):
     return (to_text_string(font.family()), int(font.pointSize()),
             font.italic(), font.bold())
 
+
 class FontLayout(QGridLayout):
     """Font selection"""
+
     def __init__(self, value, parent=None):
         QGridLayout.__init__(self)
         if not font_is_installed(value[0]):
@@ -438,12 +457,12 @@ class FontLayout(QGridLayout):
                   file=sys.stderr)
         font = tuple_to_qfont(value)
         assert font is not None
-        
+
         # Font family
         self.family = QFontComboBox(parent)
         self.family.setCurrentFont(font)
         self.addWidget(self.family, 0, 0, 1, -1)
-        
+
         # Font size
         self.size = QComboBox(parent)
         self.size.setEditable(True)
@@ -455,17 +474,17 @@ class FontLayout(QGridLayout):
         self.size.addItems([str(s) for s in sizelist])
         self.size.setCurrentIndex(sizelist.index(size))
         self.addWidget(self.size, 1, 0)
-        
+
         # Italic or not
         self.italic = QCheckBox(self.tr("Italic"), parent)
         self.italic.setChecked(font.italic())
         self.addWidget(self.italic, 1, 1)
-        
+
         # Bold or not
         self.bold = QCheckBox(self.tr("Bold"), parent)
         self.bold.setChecked(font.bold())
         self.addWidget(self.bold, 1, 2)
-        
+
     def get_font(self):
         font = self.family.currentFont()
         font.setItalic(self.italic.isChecked())
@@ -484,6 +503,7 @@ def is_float_valid(edit):
     text = edit.text()
     state = edit.validator().validate(text, 0)[0]
     return state == QDoubleValidator.Acceptable
+
 
 def is_required_valid(edit, widget_color):
     required_color = "background-color:rgb(255, 175, 90);"
@@ -511,6 +531,7 @@ def is_required_valid(edit, widget_color):
             edit.setStyleSheet(required_color)
     return False
 
+
 class FormWidget(QWidget):
     def __init__(self, data, comment="", parent=None):
         QWidget.__init__(self, parent)
@@ -525,12 +546,12 @@ class FormWidget(QWidget):
             self.formlayout.addRow(QLabel(comment))
             self.formlayout.addRow(QLabel(" "))
         if DEBUG_FORMLAYOUT:
-            print("\n"+("*"*80))
+            print("\n" + ("*" * 80))
             print("DATA:", self.data)
-            print("*"*80)
+            print("*" * 80)
             print("COMMENT:", comment)
-            print("*"*80)
-            
+            print("*" * 80)
+
     def get_dialog(self):
         """Return FormDialog instance"""
         dialog = self.parent()
@@ -555,8 +576,8 @@ class FormWidget(QWidget):
                     field = PushLayout(value, self)
                     self.formlayout.addRow(field)
                 else:
-                    img_fmt = tuple(['.'+str(bytes(ext).decode()) for ext 
-                                 in QImageReader.supportedImageFormats()])
+                    img_fmt = tuple(['.' + str(bytes(ext).decode()) for ext
+                                     in QImageReader.supportedImageFormats()])
                     if value.endswith(img_fmt):
                         # Image
                         pixmap = QPixmap(value)
@@ -576,17 +597,17 @@ class FormWidget(QWidget):
                 if value in ['file', 'dir'] or value.startswith('file:'):
                     field = FileLayout(value, self)
                 elif value == 'slider' or value.startswith('slider:') \
-                                       or value.startswith('slider@'):
+                        or value.startswith('slider@'):
                     field = SliderLayout(value, self)
                 elif value == 'password':
                     field = QLineEdit(self)
                     field.setEchoMode(QLineEdit.Password)
                 elif value in ['calendar', 'calendarM'] \
-                           or value.startswith(('calendar:', 'calendarM:')) \
-                           or value.startswith(('calendar@', 'calendarM@')):
+                        or value.startswith(('calendar:', 'calendarM:')) \
+                        or value.startswith(('calendar@', 'calendarM@')):
                     index = value.find('@')
                     if index != -1:
-                        value, date = value[:index], value[index+1:]
+                        value, date = value[:index], value[index + 1:]
                     else:
                         date = False
                     field = QCalendarWidget(self)
@@ -613,8 +634,8 @@ class FormWidget(QWidget):
                     field = QTextEdit(value, self)
                 else:
                     field = QLineEdit(value, self)
-            elif isinstance(value, (list, tuple)) and is_text_string(value[0])\
-                                                 and value[0].startswith('0b'):
+            elif isinstance(value, (list, tuple)) and is_text_string(value[0]) \
+                    and value[0].startswith('0b'):
                 field = CheckLayout(value[1:], value[0][2:], self)
             elif isinstance(value, (list, tuple)):
                 save_value = value
@@ -623,8 +644,8 @@ class FormWidget(QWidget):
                 if isinstance(selindex, int):
                     selindex = selindex - 1
                 if isinstance(value[0], (list, tuple)):
-                    keys = [ key for key, _val in value ]
-                    value = [ val for _key, val in value ]
+                    keys = [key for key, _val in value]
+                    value = [val for _key, val in value]
                 else:
                     keys = value
                 if selindex in value:
@@ -632,7 +653,7 @@ class FormWidget(QWidget):
                 elif selindex in keys:
                     selindex = keys.index(selindex)
                 elif not isinstance(selindex, int):
-                    print("Warning: '%s' index is invalid (label: "\
+                    print("Warning: '%s' index is invalid (label: " \
                           "%s, value: %s)" % (selindex, label, value),
                           file=STDERR)
                     selindex = -1
@@ -674,17 +695,17 @@ class FormWidget(QWidget):
             # Eventually catching the 'countfield' feature and processing it
             if label.startswith('n '):
                 label = label[2:]
-                if isinstance(field, QLineEdit) and is_text_string(value) or\
-                   isinstance(field, QComboBox):
+                if isinstance(field, QLineEdit) and is_text_string(value) or \
+                        isinstance(field, QComboBox):
                     field = CountLayout(field)
                 else:
-                    print("Warning: '%s' doesn't support 'nfield' feature"\
+                    print("Warning: '%s' doesn't support 'nfield' feature" \
                           % label, file=STDERR)
 
             # Eventually extracting tooltip from label and processing it
             index = label.find('::')
             if index != -1:
-                label, tooltip = label[:index], label[index+2:]
+                label, tooltip = label[:index], label[index + 2:]
                 field.setToolTip(tooltip)
 
             # Eventually catching the 'required' feature and processing it
@@ -695,7 +716,7 @@ class FormWidget(QWidget):
                     dialog = self.get_dialog()
                     dialog.register_required_field(field)
                 else:
-                    print("Warning: '%s' doesn't support 'required' feature"\
+                    print("Warning: '%s' doesn't support 'required' feature" \
                           % type(field), file=STDERR)
                 if isinstance(field, QLineEdit):
                     if SIGNAL is None:
@@ -711,7 +732,7 @@ class FormWidget(QWidget):
                                      dialog.required_valid)
                 elif isinstance(field, QComboBox):
                     if SIGNAL is None:
-                        field.currentIndexChanged.connect(\
+                        field.currentIndexChanged.connect( \
                             dialog.required_valid)
                     else:
                         self.connect(field,
@@ -719,7 +740,7 @@ class FormWidget(QWidget):
                                      dialog.required_valid)
                 elif isinstance(field, FileLayout):
                     if SIGNAL is None:
-                        field.lineedit.textChanged.connect(\
+                        field.lineedit.textChanged.connect( \
                             dialog.required_valid)
                     else:
                         self.connect(field.lineedit,
@@ -727,7 +748,7 @@ class FormWidget(QWidget):
                                      dialog.required_valid)
                 elif isinstance(field, RadioLayout):
                     if SIGNAL is None:
-                        field.group.buttonClicked.connect(\
+                        field.group.buttonClicked.connect( \
                             dialog.required_valid)
                     else:
                         self.connect(field.group, SIGNAL('buttonClicked(int)'),
@@ -744,7 +765,7 @@ class FormWidget(QWidget):
                 self.formlayout.addRow(QLabel(label))
                 self.formlayout.addRow(field)
             self.widgets.append(field)
-            
+
     def get(self):
         valuelist = []
         for index, (label, value) in enumerate(self.data):
@@ -778,7 +799,7 @@ class FormWidget(QWidget):
                     # Return an int index, if initialization was an int
                     value = index + 1
                 else:
-                    value = value[index+1]
+                    value = value[index + 1]
                     if isinstance(value, (list, tuple)):
                         value = value[0]
             elif isinstance(value, bool):
@@ -819,11 +840,11 @@ class FormWidget(QWidget):
                 dic = OrderedDict()
             for label, value in valuelist:
                 if label in dic.keys():
-                    print("Warning: '%s' is duplicate and '%s' doesn't "\
-                          "handle it, you should use 'list' or 'XML' instead"\
+                    print("Warning: '%s' is duplicate and '%s' doesn't " \
+                          "handle it, you should use 'list' or 'XML' instead" \
                           % (label, self.result), file=STDERR)
                 if isinstance(value, (datetime.date, datetime.time,
-                              datetime.datetime)) and self.result == 'JSON':
+                                      datetime.datetime)) and self.result == 'JSON':
                     dic[label] = value.isoformat()
                 else:
                     dic[label] = value
@@ -837,7 +858,7 @@ class FormWidget(QWidget):
                 tooltip = ''
                 index = label.find('::')
                 if index != -1:
-                    label, tooltip = label[:index], label[index+2:]
+                    label, tooltip = label[:index], label[index + 2:]
                 required = 'false'
                 if label.endswith(' *'):
                     label = label[:-2]
@@ -866,17 +887,17 @@ class FormComboWidget(QWidget):
         self.setLayout(layout)
         self.combobox = QComboBox()
         layout.addWidget(self.combobox)
-        
+
         self.stackwidget = QStackedWidget(self)
         layout.addWidget(self.stackwidget)
         if SIGNAL is None:
             self.combobox.currentIndexChanged.connect(
-                                            self.stackwidget.setCurrentIndex)
+                self.stackwidget.setCurrentIndex)
         else:
             self.connect(self.combobox, SIGNAL("currentIndexChanged(int)"),
                          self.stackwidget, SLOT("setCurrentIndex(int)"))
 
-        self.result = parent.result 
+        self.result = parent.result
         self.widget_color = parent.widget_color
         if self.widget_color:
             style = "background-color:" + self.widget_color + ";"
@@ -888,7 +909,7 @@ class FormComboWidget(QWidget):
             widget = FormWidget(data, comment=comment, parent=self)
             self.stackwidget.addWidget(widget)
             self.widgetlist.append((title, widget))
-            
+
     def setup(self):
         for title, widget in self.widgetlist:
             widget.setup()
@@ -939,18 +960,18 @@ class FormTabWidget(QWidget):
         self.type = parent.type
         self.widgetlist = []
         for data, title, comment in datalist:
-            if len(data[0])==3:
+            if len(data[0]) == 3:
                 widget = FormComboWidget(data, comment=comment, parent=self)
             else:
                 widget = FormWidget(data, comment=comment, parent=self)
             index = self.tabwidget.addTab(widget, title)
             self.tabwidget.setTabToolTip(index, comment)
             self.widgetlist.append((title, widget))
-            
+
     def setup(self):
         for title, widget in self.widgetlist:
             widget.setup()
-            
+
     def get(self):
         if self.result == 'list':
             return [widget.get() for title, widget in self.widgetlist]
@@ -987,12 +1008,13 @@ class FormTabWidget(QWidget):
 
 class FormDialog(QDialog):
     """Form Dialog"""
+
     def __init__(self, data, title="", comment="", icon=None, parent=None,
                  apply=None, ok=None, cancel=None, result=None, outfile=None,
                  type=None, scrollbar=None, background_color=None,
                  widget_color=None):
         QDialog.__init__(self, parent)
-        
+
         # Destroying the C++ object right after closing the dialog box,
         # otherwise it may be garbage-collected in another QThread
         # (e.g. the editor's analysis thread in Spyder), thus leading to
@@ -1010,7 +1032,7 @@ class FormDialog(QDialog):
         elif isinstance(apply, (list, tuple)):
             self.apply_, self.apply_callback = apply
         elif apply is not None:
-            raise AssertionError("`apply` argument must be either a function "\
+            raise AssertionError("`apply` argument must be either a function " \
                                  "or tuple ('Apply label', apply_callback)")
         self.outfile = outfile
         self.result = result
@@ -1033,11 +1055,11 @@ class FormDialog(QDialog):
         if isinstance(data[0][0], (list, tuple)):
             self.formwidget = FormTabWidget(data, comment=comment,
                                             parent=self)
-        elif len(data[0])==3:
+        elif len(data[0]) == 3:
             self.formwidget = FormComboWidget(data, comment=comment,
                                               parent=self)
         else:
-            self.formwidget = FormWidget(data, comment=comment, 
+            self.formwidget = FormWidget(data, comment=comment,
                                          parent=self)
         layout = QVBoxLayout()
 
@@ -1053,7 +1075,7 @@ class FormDialog(QDialog):
         self.float_fields = []
         self.required_fields = []
         self.formwidget.setup()
-        
+
         # Button box
         self.bbox = bbox = QDialogButtonBox()
         if self.ok == True:
@@ -1091,12 +1113,12 @@ class FormDialog(QDialog):
         self.required_valid()
 
         self.setLayout(layout)
-        
+
         self.setWindowTitle(self.title)
         if not isinstance(icon, QIcon):
             icon = QWidget().style().standardIcon(QStyle.SP_MessageBoxQuestion)
         self.setWindowIcon(icon)
-        
+
     def register_float_field(self, field):
         self.float_fields.append(field)
 
@@ -1123,7 +1145,7 @@ class FormDialog(QDialog):
             if btn_role in (QDialogButtonBox.AcceptRole,
                             QDialogButtonBox.ApplyRole):
                 btn.setEnabled(valid)
-        
+
     def accept(self):
         if self.result == 'XML':
             app = ET.Element('App')
@@ -1134,11 +1156,11 @@ class FormDialog(QDialog):
         else:
             self.data = self.formwidget.get()
         QDialog.accept(self)
-        
+
     def reject(self):
         self.data = None
         QDialog.reject(self)
-        
+
     def apply(self):
         if self.result == 'XML':
             app = ET.Element('App')
@@ -1150,7 +1172,7 @@ class FormDialog(QDialog):
         else:
             self.apply_callback(self.formwidget.get(),
                                 self.formwidget.get_widgets())
-        
+
     def get(self):
         """Return form result"""
         # It is import to avoid accessing Qt C++ object as it has probably
@@ -1198,16 +1220,16 @@ def fedit(data, title="", comment="", icon=None, parent=None, apply=None,
     :param str widget_color: color of the widgets
 
     :return: Serialized result (data type depends on `result` parameter)
-    
+
     datalist: list/tuple of (field_name, field_value)
     datagroup: list/tuple of (datalist *or* datagroup, title, comment)
-    
+
     Tips:
       * one field for each member of a datalist
       * one tab for each member of a top-level datagroup
-      * one page (of a multipage widget, each page can be selected with a 
+      * one page (of a multipage widget, each page can be selected with a
         combo box) for each member of a datagroup inside a datagroup
-       
+
     Supported types for field_value:
       - int, float, str, unicode, bool
       - colors: in Qt-compatible text form, i.e. in hex format or name (red,...)
@@ -1230,7 +1252,7 @@ def fedit(data, title="", comment="", icon=None, parent=None, apply=None,
         _app = QApplication([])
         translator_qt = QTranslator()
         translator_qt.load('qt_' + QLocale.system().name(),
-                       QLibraryInfo.location(QLibraryInfo.TranslationsPath))
+                           QLibraryInfo.location(QLibraryInfo.TranslationsPath))
         _app.installTranslator(translator_qt)
 
     serial = ['list', 'dict', 'OrderedDict', 'JSON', 'XML']
@@ -1253,7 +1275,6 @@ def fedit(data, title="", comment="", icon=None, parent=None, apply=None,
 
 
 if __name__ == "__main__":
-
     def create_datalist_example():
         return [('str', 'this is a string'),
                 ('str', """this is a 
@@ -1272,29 +1293,35 @@ if __name__ == "__main__":
                 ('date', datetime.date(2010, 10, 10)),
                 ('datetime', datetime.datetime(2010, 10, 10)),
                 ]
-        
+
+
     def create_datagroup_example():
         datalist = create_datalist_example()
         return ((datalist, "Category 1", "Category 1 comment"),
                 (datalist, "Category 2", "Category 2 comment"),
                 (datalist, "Category 3", "Category 3 comment"))
-    
-    #--------- datalist example
+
+
+    # --------- datalist example
     datalist = create_datalist_example()
+
+
     def apply_test(data):
         print("data:", data)
+
+
     print("result:", fedit(datalist, title="Example",
                            comment="This is just an <b>example</b>.",
                            apply=apply_test))
-    
-    #--------- datagroup example
+
+    # --------- datagroup example
     datagroup = create_datagroup_example()
     print("result:", fedit(datagroup, "Global title"))
-    
-    #--------- datagroup inside a datagroup example
+
+    # --------- datagroup inside a datagroup example
     datalist = create_datalist_example()
     datagroup = create_datagroup_example()
     print("result:", fedit(((datagroup, "Title 1", "Tab 1 comment"),
                             (datalist, "Title 2", "Tab 2 comment"),
                             (datalist, "Title 3", "Tab 3 comment")),
-                            "Global title"))
+                           "Global title"))
