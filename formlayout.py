@@ -89,18 +89,24 @@ if PY2:
 
 
     def u(obj):
-        """Make unicode object"""
+        """
+        Make unicode object
+        """
         return codecs.unicode_escape_decode(obj)[0]
 else:
     # Python 3
     def u(obj):
-        """Return string as it is"""
+        """
+        Return string as it is
+        """
         return obj
 
 
 def is_text_string(obj):
-    """Return True if `obj` is a text string, False if it is anything else,
-    like binary data (Python 3) or QString (Python 2, PyQt API #1)"""
+    """
+    Return True if `obj` is a text string, False if it is anything else,
+    like binary data (Python 3) or QString (Python 2, PyQt API #1)
+    """
     if PY2:
         # Python 2
         return isinstance(obj, basestring)
@@ -110,7 +116,9 @@ def is_text_string(obj):
 
 
 def is_binary_string(obj):
-    """Return True if `obj` is a binary string, False if it is anything else"""
+    """
+    Return True if `obj` is a binary string, False if it is anything else
+    """
     if PY2:
         # Python 2
         return isinstance(obj, str)
@@ -120,13 +128,17 @@ def is_binary_string(obj):
 
 
 def is_string(obj):
-    """Return True if `obj` is a text or binary Python string object,
-    False if it is anything else, like a QString (Python 2, PyQt API #1)"""
+    """
+    Return True if `obj` is a text or binary Python string object,
+    False if it is anything else, like a QString (Python 2, PyQt API #1)
+    """
     return is_text_string(obj) or is_binary_string(obj)
 
 
 def to_text_string(obj, encoding=None):
-    """Convert `obj` to (unicode) text string"""
+    """
+    Convert `obj` to (unicode) text string
+    """
     if PY2:
         # Python 2
         if encoding is None:
@@ -207,8 +219,9 @@ def text_to_qcolor(text):
 
 
 class ColorLayout(QHBoxLayout):
-    """Color-specialized QLineEdit layout"""
-
+    """
+    Color-specialized QLineEdit layout
+    """
     def __init__(self, color, parent=None):
         QHBoxLayout.__init__(self)
         assert isinstance(color, QColor)
@@ -245,8 +258,9 @@ class ColorLayout(QHBoxLayout):
 
 
 class FileLayout(QHBoxLayout):
-    """File-specialized QLineEdit layout"""
-
+    """
+    File-specialized QLineEdit layout
+    """
     def __init__(self, value, parent=None):
         QHBoxLayout.__init__(self)
         self.value = value
@@ -275,8 +289,9 @@ class FileLayout(QHBoxLayout):
 
 
 class SliderLayout(QHBoxLayout):
-    """QSlider with QLabel"""
-
+    """
+    QSlider with QLabel
+    """
     def __init__(self, value, parent=None):
         QHBoxLayout.__init__(self)
         index = value.find('@')
@@ -316,8 +331,9 @@ class SliderLayout(QHBoxLayout):
 
 
 class RadioLayout(QVBoxLayout):
-    """Radio buttons layout with QButtonGroup"""
-
+    """
+    Radio buttons layout with QButtonGroup
+    """
     def __init__(self, buttons, index, parent=None):
         QVBoxLayout.__init__(self)
         self.setSpacing(0)
@@ -338,8 +354,9 @@ class RadioLayout(QVBoxLayout):
 
 
 class CheckLayout(QVBoxLayout):
-    """Check boxes layout with QButtonGroup"""
-
+    """
+    Checkboxes layout with QButtonGroup
+    """
     def __init__(self, boxes, checks, parent=None):
         QVBoxLayout.__init__(self)
         self.setSpacing(0)
@@ -360,8 +377,9 @@ class CheckLayout(QVBoxLayout):
 
 
 class PushLayout(QHBoxLayout):
-    """Push buttons horizontal layout"""
-
+    """
+    Push buttons horizontal layout
+    """
     def __init__(self, buttons, parent=None):
         QHBoxLayout.__init__(self)
         self.result = parent.result
@@ -392,8 +410,9 @@ class PushLayout(QHBoxLayout):
 
 
 class CountLayout(QHBoxLayout):
-    """Field with a QSpinBox"""
-
+    """
+    Field with a QSpinBox
+    """
     def __init__(self, field, parent=None):
         QHBoxLayout.__init__(self)
         self.field = field
@@ -417,7 +436,9 @@ class CountLayout(QHBoxLayout):
 
 
 def font_is_installed(font):
-    """Check if font is installed"""
+    """
+    Check if font is installed
+    """
     return [fam for fam in QFontDatabase().families()
             if to_text_string(fam) == font]
 
@@ -448,8 +469,9 @@ def qfont_to_tuple(font):
 
 
 class FontLayout(QGridLayout):
-    """Font selection"""
-
+    """
+    Font selection
+    """
     def __init__(self, value, parent=None):
         QGridLayout.__init__(self)
         if not font_is_installed(value[0]):
@@ -553,7 +575,9 @@ class FormWidget(QWidget):
             print("*" * 80)
 
     def get_dialog(self):
-        """Return FormDialog instance"""
+        """
+        Return FormDialog instance
+        """
         dialog = self.parent()
         while not isinstance(dialog, QDialog):
             dialog = dialog.parent()
@@ -1007,8 +1031,9 @@ class FormTabWidget(QWidget):
 
 
 class FormDialog(QDialog):
-    """Form Dialog"""
-
+    """
+    Form Dialog
+    """
     def __init__(self, data, title="", comment="", icon=None, parent=None,
                  apply=None, ok=None, cancel=None, result=None, outfile=None,
                  type=None, scrollbar=None, background_color=None,
@@ -1174,7 +1199,9 @@ class FormDialog(QDialog):
                                 self.formwidget.get_widgets())
 
     def get(self):
-        """Return form result"""
+        """
+        Return form result
+        """
         # It is import to avoid accessing Qt C++ object as it has probably
         # already been destroyed, due to the Qt.WA_DeleteOnClose attribute
         if self.outfile:
