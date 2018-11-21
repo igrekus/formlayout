@@ -1,0 +1,1 @@
+Tests were written mostly as a practice.

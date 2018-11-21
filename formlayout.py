@@ -33,6 +33,8 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 """
 
+# TODO elaborate docstrings
+
 from __future__ import print_function
 
 __version__ = '2.0.0alpha'
@@ -75,6 +77,7 @@ except ImportError:
     try:
         from PySide2.QtGui import *
         from PySide2.QtCore import *
+        from PySide2.QtWidgets import *
 
         QT_LIB = 'PySide2'
     except ImportError:
@@ -89,18 +92,24 @@ if PY2:
 
 
     def u(obj):
-        """Make unicode object"""
+        """
+        Make unicode object
+        """
         return codecs.unicode_escape_decode(obj)[0]
 else:
     # Python 3
     def u(obj):
-        """Return string as it is"""
+        """
+        Return string as it is
+        """
         return obj
 
 
 def is_text_string(obj):
-    """Return True if `obj` is a text string, False if it is anything else,
-    like binary data (Python 3) or QString (Python 2, PyQt API #1)"""
+    """
+    Return True if `obj` is a text string, False if it is anything else,
+    like binary data (Python 3) or QString (Python 2, PyQt API #1)
+    """
     if PY2:
         # Python 2
         return isinstance(obj, basestring)
@@ -110,7 +119,9 @@ def is_text_string(obj):
 
 
 def is_binary_string(obj):
-    """Return True if `obj` is a binary string, False if it is anything else"""
+    """
+    Return True if `obj` is a binary string, False if it is anything else
+    """
     if PY2:
         # Python 2
         return isinstance(obj, str)
@@ -120,13 +131,17 @@ def is_binary_string(obj):
 
 
 def is_string(obj):
-    """Return True if `obj` is a text or binary Python string object,
-    False if it is anything else, like a QString (Python 2, PyQt API #1)"""
+    """
+    Return True if `obj` is a text or binary Python string object,
+    False if it is anything else, like a QString (Python 2, PyQt API #1)
+    """
     return is_text_string(obj) or is_binary_string(obj)
 
 
 def to_text_string(obj, encoding=None):
-    """Convert `obj` to (unicode) text string"""
+    """
+    Convert `obj` to (unicode) text string
+    """
     if PY2:
         # Python 2
         if encoding is None:
@@ -207,13 +222,14 @@ def text_to_qcolor(text):
 
 
 class ColorLayout(QHBoxLayout):
-    """Color-specialized QLineEdit layout"""
-
+    """
+    Color-specialized QLineEdit layout
+    """
     def __init__(self, color, parent=None):
         QHBoxLayout.__init__(self)
         assert isinstance(color, QColor)
         self.lineedit = QLineEdit(color.name(), parent)
-        if SIGNAL is None:
+        if SIGNAL is None:   # TODO simplify signal connects?
             self.lineedit.textChanged.connect(self.update_color)
         else:
             self.connect(self.lineedit, SIGNAL("textChanged(QString)"),
@@ -245,11 +261,14 @@ class ColorLayout(QHBoxLayout):
 
 
 class FileLayout(QHBoxLayout):
-    """File-specialized QLineEdit layout"""
-
-    def __init__(self, value, parent=None):
+    """
+    File-specialized QLineEdit layout
+    """
+    # TODO customisable file dialog captions
+    # TODO add file filter docstring
+    def __init__(self, dialog_type, parent=None):
         QHBoxLayout.__init__(self)
-        self.value = value
+        self.dialog_type = dialog_type
         self.lineedit = QLineEdit('', parent)
         self.addWidget(self.lineedit)
         self.filebtn = QPushButton('Browse')
@@ -257,12 +276,12 @@ class FileLayout(QHBoxLayout):
         self.addWidget(self.filebtn)
 
     def getfile(self):
-        if self.value.startswith('file'):
+        if self.dialog_type.startswith('file'):
             name = QFileDialog.getOpenFileName(None, 'Select file',
-                                               filter=self.value[5:])
+                                               filter=self.dialog_type[5:])
             if QT_LIB == 'PyQt5':
                 name, _filter = name
-        elif self.value == 'dir':
+        elif self.dialog_type == 'dir':
             name = QFileDialog.getExistingDirectory(None, 'Select directory')
         if name:
             self.lineedit.setText(name)
@@ -275,18 +294,20 @@ class FileLayout(QHBoxLayout):
 
 
 class SliderLayout(QHBoxLayout):
-    """QSlider with QLabel"""
-
-    def __init__(self, value, parent=None):
+    """
+    QSlider with QLabel
+    value = slider[[max:][min:max][:empty if ticks needed]@default_value]
+    """
+    def __init__(self, slider_param, parent=None):
         QHBoxLayout.__init__(self)
-        index = value.find('@')
+        index = slider_param.find('@')
         if index != -1:
-            value, default = value[:index], int(value[index + 1:])
+            slider_param, default = slider_param[:index], int(slider_param[index + 1:])
         else:
             default = False
-        parsed = value.split(':')
+        parsed = slider_param.split(':')
         self.slider = QSlider(Qt.Horizontal)
-        if parsed[-1] == '':
+        if parsed[-1] == '':   # TODO rewrite arg parsing?
             self.slider.setTickPosition(2)
             parsed.pop(-1)
         if len(parsed) == 2:
@@ -297,27 +318,30 @@ class SliderLayout(QHBoxLayout):
         if default:
             self.slider.setValue(default)  # always set value in last
         if SIGNAL is None:
-            self.slider.valueChanged.connect(self.update)
+            self.slider.valueChanged.connect(self.update)   # TODO simplify signal connect
         else:
             self.connect(self.slider, SIGNAL("valueChanged(int)"), self.update)
-        self.cpt = QLabel(str(self.value()))
+        self.value_label = QLabel(str(self.value()))
         self.addWidget(self.slider)
-        self.addWidget(self.cpt)
+        self.addWidget(self.value_label)
 
     def update(self):
-        self.cpt.setText(str(self.value()))
+        self.value_label.setText(str(self.value()))
 
     def value(self):
         return self.slider.value()
 
     def setStyleSheet(self, style):
         self.slider.setStyleSheet(style)
-        self.cpt.setStyleSheet(style)
+        self.value_label.setStyleSheet(style)
 
 
 class RadioLayout(QVBoxLayout):
-    """Radio buttons layout with QButtonGroup"""
-
+    """
+    Radio buttons layout with QButtonGroup
+    buttons = rb text
+    index = selected rb
+    """
     def __init__(self, buttons, index, parent=None):
         QVBoxLayout.__init__(self)
         self.setSpacing(0)
@@ -338,8 +362,10 @@ class RadioLayout(QVBoxLayout):
 
 
 class CheckLayout(QVBoxLayout):
-    """Check boxes layout with QButtonGroup"""
-
+    """
+    Checkboxes layout with QButtonGroup
+    boxes = list of strings for option names
+    """
     def __init__(self, boxes, checks, parent=None):
         QVBoxLayout.__init__(self)
         self.setSpacing(0)
@@ -347,7 +373,7 @@ class CheckLayout(QVBoxLayout):
         self.group.setExclusive(False)
         for i, (box, check) in enumerate(zip(boxes, checks)):
             cbx = QCheckBox(box)
-            cbx.setChecked(eval(check))
+            cbx.setChecked(bool(int(check)))   # explicitly convert str->int->bool instead of eval
             self.addWidget(cbx)
             self.group.addButton(cbx, i)
 
@@ -360,8 +386,10 @@ class CheckLayout(QVBoxLayout):
 
 
 class PushLayout(QHBoxLayout):
-    """Push buttons horizontal layout"""
-
+    """
+    Push buttons horizontal layout
+    buttons = ('name', callback), ()...
+    """
     def __init__(self, buttons, parent=None):
         QHBoxLayout.__init__(self)
         self.result = parent.result
@@ -392,15 +420,17 @@ class PushLayout(QHBoxLayout):
 
 
 class CountLayout(QHBoxLayout):
-    """Field with a QSpinBox"""
-
+    """
+    Field with a QSpinBox
+    input_field + spinbox
+    """
     def __init__(self, field, parent=None):
         QHBoxLayout.__init__(self)
         self.field = field
-        self.count = QSpinBox()
-        self.count.setFixedWidth(45)
+        self.spinbox = QSpinBox()
+        self.spinbox.setFixedWidth(45)
         self.addWidget(self.field)
-        self.addWidget(self.count)
+        self.addWidget(self.spinbox)
 
     def text(self):
         return self.field.text()
@@ -409,15 +439,17 @@ class CountLayout(QHBoxLayout):
         return self.field.currentIndex()
 
     def n(self):
-        return self.count.value()
+        return self.spinbox.value()
 
     def setStyleSheet(self, style):
         self.field.setStyleSheet(style)
-        self.count.setStyleSheet(style)
+        self.spinbox.setStyleSheet(style)
 
 
 def font_is_installed(font):
-    """Check if font is installed"""
+    """
+    Check if font is installed
+    """
     return [fam for fam in QFontDatabase().families()
             if to_text_string(fam) == font]
 
@@ -448,8 +480,10 @@ def qfont_to_tuple(font):
 
 
 class FontLayout(QGridLayout):
-    """Font selection"""
-
+    """
+    Font selection
+    value = ('font family', size, Italic, Bold)
+    """
     def __init__(self, value, parent=None):
         QGridLayout.__init__(self)
         if not font_is_installed(value[0]):
@@ -506,6 +540,7 @@ def is_float_valid(edit):
 
 
 def is_required_valid(edit, widget_color):
+    print('>>>>>>>>>>>>> required valid', edit, widget_color)
     required_color = "background-color:rgb(255, 175, 90);"
     if widget_color:
         widget_color = "background-color:" + widget_color + ";"
@@ -553,7 +588,9 @@ class FormWidget(QWidget):
             print("*" * 80)
 
     def get_dialog(self):
-        """Return FormDialog instance"""
+        """
+        Return FormDialog instance
+        """
         dialog = self.parent()
         while not isinstance(dialog, QDialog):
             dialog = dialog.parent()
@@ -1007,8 +1044,9 @@ class FormTabWidget(QWidget):
 
 
 class FormDialog(QDialog):
-    """Form Dialog"""
-
+    """
+    Form Dialog
+    """
     def __init__(self, data, title="", comment="", icon=None, parent=None,
                  apply=None, ok=None, cancel=None, result=None, outfile=None,
                  type=None, scrollbar=None, background_color=None,
@@ -1174,7 +1212,9 @@ class FormDialog(QDialog):
                                 self.formwidget.get_widgets())
 
     def get(self):
-        """Return form result"""
+        """
+        Return form result
+        """
         # It is import to avoid accessing Qt C++ object as it has probably
         # already been destroyed, due to the Qt.WA_DeleteOnClose attribute
         if self.outfile:

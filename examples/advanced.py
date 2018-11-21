@@ -19,16 +19,16 @@ from formlayout import QLineEdit
 
 def create_datalist_example():
     test = [('str *', 'this is a string'),
-            ('n str', 'this is a string'), # Line edit with a count field (spin box)
-                                           # Example: shopping list of undetermined items
+            ('n str', 'this is a string'),   # Line edit with a count field (spin box)
+                                             # Example: shopping list of undetermined items
             ('str_m *', """this is a 
              MULTILINE
              string"""),
             ('file *', 'file'),
             ('list *', [0, '1', '3', '4']),
-            ('n list', [0, '1', '3', '4']), # Combo box with a count field (spin box)
-                                            # Example: shopping list of selected items
-                                            # (3 jeans, 11 T-shirts, ...)
+            ('n nlist', [0, '1', '3', '4']),   # Combo box with a count field (spin box)
+                                               # Example: shopping list of selected items
+                                               # (3 jeans, 11 T-shirts, ...)
             ('tuple *', (0, '1', '3', '4')),
             ('bool list', ['0b110', '1', '3', '4']),
             ('list2', ['--', ('none', 'None'), ('--', 'Dashed'),
