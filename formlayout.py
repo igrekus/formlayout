@@ -293,6 +293,7 @@ class FileLayout(QHBoxLayout):
 class SliderLayout(QHBoxLayout):
     """
     QSlider with QLabel
+    value = slider[[max:][min:max][:empty if ticks needed]@default_value]
     """
     def __init__(self, slider_param, parent=None):
         QHBoxLayout.__init__(self)
@@ -335,6 +336,8 @@ class SliderLayout(QHBoxLayout):
 class RadioLayout(QVBoxLayout):
     """
     Radio buttons layout with QButtonGroup
+    buttons = rb text
+    index = selected rb
     """
     def __init__(self, buttons, index, parent=None):
         QVBoxLayout.__init__(self)
@@ -358,6 +361,7 @@ class RadioLayout(QVBoxLayout):
 class CheckLayout(QVBoxLayout):
     """
     Checkboxes layout with QButtonGroup
+    boxes = list of strings for option names
     """
     def __init__(self, boxes, checks, parent=None):
         QVBoxLayout.__init__(self)
@@ -381,6 +385,7 @@ class CheckLayout(QVBoxLayout):
 class PushLayout(QHBoxLayout):
     """
     Push buttons horizontal layout
+    buttons = ('name', callback), ()...
     """
     def __init__(self, buttons, parent=None):
         QHBoxLayout.__init__(self)
@@ -414,6 +419,7 @@ class PushLayout(QHBoxLayout):
 class CountLayout(QHBoxLayout):
     """
     Field with a QSpinBox
+    input_field + spinbox
     """
     def __init__(self, field, parent=None):
         QHBoxLayout.__init__(self)
@@ -473,6 +479,7 @@ def qfont_to_tuple(font):
 class FontLayout(QGridLayout):
     """
     Font selection
+    value = ('font family', size, Italic, Bold)
     """
     def __init__(self, value, parent=None):
         QGridLayout.__init__(self)
