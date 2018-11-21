@@ -263,8 +263,9 @@ class FileLayout(QHBoxLayout):
     File-specialized QLineEdit layout
     """
     def __init__(self, value, parent=None):
+    def __init__(self, dialog_type, parent=None):
         QHBoxLayout.__init__(self)
-        self.value = value
+        self.dialog_type = dialog_type
         self.lineedit = QLineEdit('', parent)
         self.addWidget(self.lineedit)
         self.filebtn = QPushButton('Browse')
@@ -272,12 +273,12 @@ class FileLayout(QHBoxLayout):
         self.addWidget(self.filebtn)
 
     def getfile(self):
-        if self.value.startswith('file'):
+        if self.dialog_type.startswith('file'):
             name = QFileDialog.getOpenFileName(None, 'Select file',
-                                               filter=self.value[5:])
+                                               filter=self.dialog_type[5:])
             if QT_LIB == 'PyQt5':
                 name, _filter = name
-        elif self.value == 'dir':
+        elif self.dialog_type == 'dir':
             name = QFileDialog.getExistingDirectory(None, 'Select directory')
         if name:
             self.lineedit.setText(name)
@@ -293,16 +294,16 @@ class SliderLayout(QHBoxLayout):
     """
     QSlider with QLabel
     """
-    def __init__(self, value, parent=None):
+    def __init__(self, slider_param, parent=None):
         QHBoxLayout.__init__(self)
-        index = value.find('@')
+        index = slider_param.find('@')
         if index != -1:
-            value, default = value[:index], int(value[index + 1:])
+            slider_param, default = slider_param[:index], int(slider_param[index + 1:])
         else:
             default = False
-        parsed = value.split(':')
+        parsed = slider_param.split(':')
         self.slider = QSlider(Qt.Horizontal)
-        if parsed[-1] == '':
+        if parsed[-1] == '':   # TODO rewrite arg parsing?
             self.slider.setTickPosition(2)
             parsed.pop(-1)
         if len(parsed) == 2:
@@ -316,19 +317,19 @@ class SliderLayout(QHBoxLayout):
             self.slider.valueChanged.connect(self.update)
         else:
             self.connect(self.slider, SIGNAL("valueChanged(int)"), self.update)
-        self.cpt = QLabel(str(self.value()))
+        self.value_label = QLabel(str(self.value()))
         self.addWidget(self.slider)
-        self.addWidget(self.cpt)
+        self.addWidget(self.value_label)
 
     def update(self):
-        self.cpt.setText(str(self.value()))
+        self.value_label.setText(str(self.value()))
 
     def value(self):
         return self.slider.value()
 
     def setStyleSheet(self, style):
         self.slider.setStyleSheet(style)
-        self.cpt.setStyleSheet(style)
+        self.value_label.setStyleSheet(style)
 
 
 class RadioLayout(QVBoxLayout):
@@ -417,10 +418,10 @@ class CountLayout(QHBoxLayout):
     def __init__(self, field, parent=None):
         QHBoxLayout.__init__(self)
         self.field = field
-        self.count = QSpinBox()
-        self.count.setFixedWidth(45)
+        self.spinbox = QSpinBox()
+        self.spinbox.setFixedWidth(45)
         self.addWidget(self.field)
-        self.addWidget(self.count)
+        self.addWidget(self.spinbox)
 
     def text(self):
         return self.field.text()
@@ -429,11 +430,11 @@ class CountLayout(QHBoxLayout):
         return self.field.currentIndex()
 
     def n(self):
-        return self.count.value()
+        return self.spinbox.value()
 
     def setStyleSheet(self, style):
         self.field.setStyleSheet(style)
-        self.count.setStyleSheet(style)
+        self.spinbox.setStyleSheet(style)
 
 
 def font_is_installed(font):
