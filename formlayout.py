@@ -33,6 +33,8 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 """
 
+# TODO elaborate docstrings
+
 from __future__ import print_function
 
 __version__ = '2.0.0alpha'
@@ -227,7 +229,7 @@ class ColorLayout(QHBoxLayout):
         QHBoxLayout.__init__(self)
         assert isinstance(color, QColor)
         self.lineedit = QLineEdit(color.name(), parent)
-        if SIGNAL is None:
+        if SIGNAL is None:   # TODO simplify signal connects?
             self.lineedit.textChanged.connect(self.update_color)
         else:
             self.connect(self.lineedit, SIGNAL("textChanged(QString)"),
@@ -262,7 +264,8 @@ class FileLayout(QHBoxLayout):
     """
     File-specialized QLineEdit layout
     """
-    def __init__(self, value, parent=None):
+    # TODO customisable file dialog captions
+    # TODO add file filter docstring
     def __init__(self, dialog_type, parent=None):
         QHBoxLayout.__init__(self)
         self.dialog_type = dialog_type
@@ -315,7 +318,7 @@ class SliderLayout(QHBoxLayout):
         if default:
             self.slider.setValue(default)  # always set value in last
         if SIGNAL is None:
-            self.slider.valueChanged.connect(self.update)
+            self.slider.valueChanged.connect(self.update)   # TODO simplify signal connect
         else:
             self.connect(self.slider, SIGNAL("valueChanged(int)"), self.update)
         self.value_label = QLabel(str(self.value()))
@@ -370,7 +373,7 @@ class CheckLayout(QVBoxLayout):
         self.group.setExclusive(False)
         for i, (box, check) in enumerate(zip(boxes, checks)):
             cbx = QCheckBox(box)
-            cbx.setChecked(eval(check))
+            cbx.setChecked(bool(int(check)))   # explicitly convert str->int->bool instead of eval
             self.addWidget(cbx)
             self.group.addButton(cbx, i)
 
@@ -537,6 +540,7 @@ def is_float_valid(edit):
 
 
 def is_required_valid(edit, widget_color):
+    print('>>>>>>>>>>>>> required valid', edit, widget_color)
     required_color = "background-color:rgb(255, 175, 90);"
     if widget_color:
         widget_color = "background-color:" + widget_color + ";"
